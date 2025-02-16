@@ -139,58 +139,64 @@ Lox это язык для скриптинга, что значит, что о�
 шагами - не так? Сейчас, он будет выводить токены, которые нам предоставил
 сканнер.
 
-### Error handling
+### Отлов ошибок
 
-While we're setting things up, another key piece of infrastructure is *error
-handling*. Textbooks sometimes gloss over this because it's more a practical
-matter than a formal computer science-y problem. But if you care about making a
-language that's actually *usable*, then handling errors gracefully is vital.
+Пока мы все настраиваем, еще одним ключевым элементом инфраструктуры является *ловаля ошибок*. 
+В учебниках об это иногда молчат, потому что это более практично.
+важнее, чем формальная задача информатики. Но если вы хотите сделать
+язык, который на самом деле *пригоден* для использования*, то изящная обработка ошибок жизненно важна.
 
-The tools our language provides for dealing with errors make up a large portion
-of its user interface. When the user's code is working, they aren't thinking
-about our language at all -- their headspace is all about *their program*. It's
-usually only when things go wrong that they notice our implementation.
+Инструменты, которые наш язык предоставляет для обработки ошибок, составляют большую часть
+его пользовательского интерфейса. Когда код пользователя работает, он не думает
+о нашем языке вообще - он полностью сосредоточено на *их программе*. Обычно пользователи замечают нашу реализацию только тогда, когда что-то идет не так.
 
-<span name="errors">When</span> that happens, it's up to us to give the user all
-of the information they need to understand what went wrong and guide them gently
-back to where they are trying to go. Doing that well means thinking about error
-handling all through the implementation of our interpreter, starting now:
+<span name="errors">Когда</span> это произойдет, мы должны предоставить пользователю все
+информации, которая им нужна, чтобы понять, что пошло не так, и мягко направить их
+обратно туда, куда они пытаются попасть. Делать хороший язык - значит
+заботиться о *ловле ошибок* с самого начала интерпретатора.
 
 <aside name="errors">
 
-Having said all that, for *this* interpreter, what we'll build is pretty bare
-bones. I'd love to talk about interactive debuggers, static analyzers and other
-fun stuff, but there's only so much ink in the pen.
+Сказав все это, для *этого* интерпретатора то, что мы построим, довольно просто. Я хотел бы поговорить об интерактивных отладчиках, статических анализаторах и других
+забавных штуках, но в ручке не так много чернил.
 
 </aside>
 
-^code lox-error
+```java
+  static void error(int line, String message) {
+    report(line, "", message);
+  }
 
-This tells users some syntax error occurred on a given line. This is really the
-bare minimum to be able to claim you even *have* error reporting. Imagine if you
-accidentally left a dangling comma in some function call and the interpreter
-printed out:
-
-```text
-Error: Unexpected "," *somewhere* in your program. Good luck finding it!
+  private static void report(int line, String where,
+                             String message) {
+    System.err.println(
+        "[line " + line + "] Error" + where + ": " + message);
+    hadError = true;
+  }
 ```
 
-That's not very helpful. We need to at least point them to the right line. Even
-better would be the beginning and end column so they know *where* in the line.
-Even better than *that* is to *show* the user the offending line, like:
+Эта функция расскажет пользователю о том, что не так случилось
+в его коде.
 
 ```text
-Error: Unexpected "," in argument list.
+Error: Неожиданная "," *гдето* в вашей программе. Удачи отыскать ошибку!
+```
+
+Это не очень полезно. Нам нужна как минимум направление к правильной линии.
+Было бы хорошо также рассказать конкретнее об ошибке.
+Это было бы лучше, чтобы конкретно указать пользователю на ошибку.
+
+```text
+Error: Неожиданная "," в списке аргументов!
 
     15 | function(first, second,);
-                               ^-- Here.
+                               ^-- Здесь.
 ```
 
-I'd love to implement something like that in this book but the honest truth is
-that it's a lot of grungy string munging code. Very useful for users, but not
-super fun to read in a book and not very technically interesting. So we'll stick
-with just a line number. In your own interpreters, please do as I say and not as
-I do.
+Я бы хотел сделать что-то такое в этой книге, но, правда в том, что предется очень долго возиться
+в коде. Хорошо для пользователей, но не очень весело для чтения книги. Мы будем
+просто указывать пользователю на строку. Но, в вашем интерпретаторе, делайте так как я говорю, и
+не делайте так как я делаю, в плане *ловли ошибок*.
 
 The primary reason we're sticking this error reporting function in the main Lox
 class is because of that `hadError` field. It's defined here:
