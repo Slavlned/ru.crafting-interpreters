@@ -1,36 +1,31 @@
-^title Scanning
-^part A Tree-Walk Interpreter
+^title Сканирование
+^part Интерпретатор обхода дерева
 
-> Take big bites. Anything worth doing is worth overdoing.
+> «Хватай по-крупному. Если уж делать, то на полную катушку.»
 >
 > <cite>Robert A. Heinlein</cite>
 
-The first step in any compiler or interpreter is <span
-name="lexing">scanning</span>. The scanner takes in raw source code as a series
-characters and groups it into meaningful chunks -- the "words" and "punctuation"
-that make up the language's grammar.
+Первая часть любого интерпретатора или компилятора это - <span
+name="lexing">сканирование/лексинг</span>. Сканер принимает необработаный код и преобразует
+символы и группы в понятные кусочки -- слова и спец-символы
+которые составляют грамматику языка
 
 <aside name="lexing">
 
-This task has been variously called "scanning" and "lexing" (short for "lexical
-analysis") over the years. Way back when computers were as big as Winebagos but
-had less memory than your watch, some people used "scanner" only to refer to the
-piece of code that dealt with reading raw source code characters from disk and
-buffering them in memory. Then "lexing" was the phase after that that did useful
-stuff with the characters.
+Эту часть обычно назвают "сканирование" и "лексинг" (сокращение от "лексический анализ") на порятежнии многих лет. Еще тогда, когда компьютеры были такими же большими, как Winebagos, но
+памяти было меньше, чем у ваших часов, некоторые люди использовали слово «сканер» только для обозначения
+фрагмент кода, который занимался чтением символов исходного кода с диска и
+буферизация их в памяти. 
 
-These days, reading a source file into memory is trivial, so it's rarely a
-distinct phase in the compiler. Because of that, the two terms are basically
-interchangeable.
+Сегодня загрузка исходного файла в память не представляет сложности, поэтому это редко является отдельным этапом в компиляторе. По этой причине оба термина теперь практически взаимозаменяемы.
 
 </aside>
 
-Scanning is a good starting point for us too because the code isn't very hard --
-pretty much a switch statement with delusions of grandeur. It will help us warm
-up before we tackle some of the more interesting material later. By the end of
-this chapter, we'll have a full-featured, fast scanner that can take any string
-of Lox source code and produce the tokens that we'll feed into the parser in the
-next chapter.
+Сканирование это хорошая точка отправления для нас, потому что код не очень сложный --
+большинство его частей это switch. Это помжет нам прогреться, прежде чем перейти
+к чему-то более интересному позже. В конце этой главы у нас будет полнофункциональный,
+быстрый лексер, который может взять любую строку кода Lox и отдать токены, которые
+мы скормим парсеру в следующей главе.
 
 ## The Interpreter Framework
 
