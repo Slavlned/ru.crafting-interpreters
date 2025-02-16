@@ -22,59 +22,122 @@ name="lexing">сканирование/лексинг</span>. Сканер пр�
 </aside>
 
 Сканирование это хорошая точка отправления для нас, потому что код не очень сложный --
-большинство его частей это switch. Это помжет нам прогреться, прежде чем перейти
+большинство его частей это switch. Это поможет нам прогреться, прежде чем перейти
 к чему-то более интересному позже. В конце этой главы у нас будет полнофункциональный,
 быстрый лексер, который может взять любую строку кода Lox и отдать токены, которые
 мы скормим парсеру в следующей главе.
 
 ## The Interpreter Framework
 
-Since this is our first real chapter, before we get to actually scanning some
-code, we need to sketch out the basic shape of our interpreter, jlox. Everything
-starts with a class in Java:
+Так как это наша первая реальная глава, преждем чем сканировать код,
+нам нужна база нашего интерпретатора, Jlox. Всё начинается с класса на Джаве:
 
-^code lox-class
+```java
+package com.craftinginterpreters.lox;
 
-Stick that in a text file, and go get your IDE or Makefile or whatever set up.
-I'll be right here when you're ready. Good? OK!
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 
-Lox is a scripting language, which means it executes directly from source. There
-are actually two ways you can run some code. If you start jlox from the command
-line and give it a path to a file, it reads the file and executes it:
+public class Lox {
+  public static void main(String[] args) throws IOException {
+    if (args.length > 1) {
+      System.out.println("Usage: jlox [script]");
+      System.exit(64); 
+    } else if (args.length == 1) {
+      runFile(args[0]);
+    } else {
+      runPrompt();
+    }
+  }
+}
+```
 
-^code run-file
+Вставьте этот текстовый файл в свой проект, зайди в своё IDE и настройте Makefile?
+Или что вам ещё нужно настроить. Мы будем здесь, когда вы закончите. Хорошо? ОК!
 
-If you want a more intimate conversation with your interpreter, you can also run
-it interactively. Fire up jlox without any arguments, and it drops you into a
-prompt where you can enter and execute code one line at a time.
+Lox это язык для скриптинга, что значит, что он исполняет код прямо из исходников.
+Здесь два пути по которому вы можете запустить код. Например с помощью команды jlox,
+передавай путь к файлу:
+
+```java
+  private static void runFile(String path) throws IOException {
+    byte[] bytes = Files.readAllBytes(Paths.get(path));
+    run(new String(bytes, Charset.defaultCharset()));
+  }
+```
+
+Если вы хотите более интимного разговора со своим интерпретатором, вы также можете запустить
+это в интерактивном режиме. Запустите jlox без каких-либо аргументов, и вы попадете в
+подсказку, где можно вводить и выполнять код по одной строке за раз.
+
+```java
+  private static void runPrompt() throws IOException {
+    InputStreamReader input = new InputStreamReader(System.in);
+    BufferedReader reader = new BufferedReader(input);
+
+    for (;;) { 
+      System.out.print("> ");
+      String line = reader.readLine();
+      if (line == null) break;
+      run(line);
+    }
+  }
+```
 
 <aside name="repl">
 
-An interactive prompt is also called a "REPL" (pronounced like "rebel" but with
-a "p"). The name comes from Lisp where implementing one is as simple as
-wrapping a loop around a few built-in functions:
+Интерактивное написание кода также называется "REPL" (читается как "рэпл").
+Это имя пришло к нам из языка Лисп, где имплементация REPL - это
+обёртка циклом некоторых билт-ин функций:
 
 ```lisp
 (print (eval (read))
 ```
 
-Working outwards from the most nested call, you **R**ead a line of input,
-**E**valuate it, **P**rint the result, then **L**oop and do it all over again.
+Работая с встроенным вызовом, вы читаете строку ввода, преобразовываете(оцениваете) её,
+выводите результат, а затем цикл повторяется заново.
 
 </aside>
 
-^code prompt
+```java
+  private static void runPrompt() throws IOException {
+    InputStreamReader input = new InputStreamReader(System.in);
+    BufferedReader reader = new BufferedReader(input);
 
-(Escape that infinite loop by hitting Control-C or throwing your machine at the
-wall if you have anger management problems.)
+    for (;;) { 
+      System.out.print("> ");
+      String line = reader.readLine();
+      if (line == null) break;
+      run(line);
+    }
+  }
+```
 
-Both the prompt and the file runner are thin wrappers around this core function:
+(Выйти из бесконечного цикла можно с помощью Control + C)
 
-^code run
+Оба, и интерактивное написание кода, и чтение его из файла заворачиваются вокруг
+этой функции:
 
-It's not super useful yet since we haven't written the interpreter, but baby
-steps, you know? Right now, it prints out the tokens our forthcoming scanner
-will emit so that we can see if we're making progress.
+```java
+  private static void run(String source) {
+    Scanner scanner = new Scanner(source);
+    List<Token> tokens = scanner.scanTokens();
+
+    // For now, just print the tokens.
+    for (Token token : tokens) {
+      System.out.println(token);
+    }
+  }
+```
+
+Это не очень юзабельно, пока мы не написали интерпретатора, но, маленькими
+шагами - не так? Сейчас, он будет выводить токены, которые нам предоставил
+сканнер.
 
 ### Error handling
 
