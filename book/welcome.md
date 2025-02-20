@@ -1,16 +1,16 @@
-^title Welcome
+^title Добро пожаловать!
 
-This may be the beginning of a grand adventure. Programming languages encompass
-a huge space to explore, play in, and perhaps carve out your own territory where
-you build something new for others to use. Brilliant computer scientists and
-software engineers have spent entire careers traversing this land without ever
-reaching the end. If this book is your first entry into the country, welcome.
+Возможно, это начало большого приключения. В области языков программирования 
+есть большие территории для исследований, забавы или даже создания чего-то 
+своего, чем смогут пользоваться другие. Блестящие ученые и программисты 
+посвятили всю свою карьеру исследованию этих земель, и так и не обнаружили их
+пределов. Если эта книга - ваш первый взгляд на эту страну, добро пожаловать.
 
-The pages of this book give you a guided tour through a corner of the world of
-languages. But before we strap on our hiking boots and venture out, we should
-familiarize ourselves with the territory. The chapters in this part introduce
-you to the basic concepts used by programming languages and how they are
-organized.
+Страницы этой книги проведут вас за собой по краю мира языков. Но прежде 
+чем мы затянем шнурки на наших походных ботинках и выдвинемся в путь, нужно 
+ознакомиться с территорией. Благодаря главам этой части книги вы получите 
+представление о базовых концепциях, используемых языками программирования, 
+и о том, как они организованы.
 
-We will also get acquainted with Lox, the language we'll spend the rest of the
-book implementing (twice). Let's go!
+Также мы познакомимся с Lox, языком программирования, который будем 
+реализовывать (дважды) на протяжении всей остальной книги. Поехали!
