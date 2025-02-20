@@ -170,7 +170,7 @@ Lox язык с динамической типизацией. Переменн�
 и повергнуть этих монстров, мы напишем *свой* сборщик мусора. 
 Я думаю вы найдете алгоритм довольно простым, интересным и веселым в написании.
 
-## Data Types
+## Типы данных
 
 In Lox's little universe, the atoms that make up all matter are the built-in
 data types. There are only a few:
