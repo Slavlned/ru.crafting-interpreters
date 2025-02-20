@@ -218,198 +218,85 @@ Pascal и C были спроектированы с учетом этого о�
 Ранее это называлось «компилятор из исходного кода в исходный код» или «транскомпилятор». После появления языков, компилируемых в JavaScript для работы в браузере, появилось модное название «транспилер».
 
 <aside name="gary">
+  
+Первым транспилятором был XLT86, который переводил ассемблерный код 8080 в ассемблер 8086. Это может показаться простым, но 8080 был 8-битным процессором, а 8086 — 16-битным, способным использовать регистры пополам. XLT86 выполнял анализ потока данных, отслеживал использование регистров в исходной программе и эффективно отображал их на регистры 8086.
 
-The first transcompiler, XLT86, translated 8080 assembly into 8086 assembly.
-That might seem straightforward, but keep in mind the 8080 was an 8-bit chip and
-the 8086 a 16-bit chip that could use each register as a pair of 8-bit ones.
-XLT86 did data flow analysis to track register usage in the source program and
-then efficiently map it to the register set of the 8086.
+Его написал Гэри Килдалл — один из трагических героев компьютерных наук. Он одним из первых осознал потенциал микрокомпьютеров, создал PL/M и CP/M — первый высокоуровневый язык и операционную систему для них.
 
-It was written by Gary Kildall, a tragic hero of computer science if there
-ever was one. One of the first people to recognize the promise of
-microcomputers, he created PL/M and CP/M, the first high level language and OS
-for them.
-
-He was a sea captain, business owner, licensed pilot, and motocyclist. A TV host
-with the Kris Kristofferson-esque look sported by dashing bearded dudes in the
-80s. He took on Bill Gates and, like many, lost, before meeting his end
-in a biker bar under mysterious circumstances. He died too young, but sure as
-hell lived before he did.
+Он был морским капитаном, владельцем бизнеса, лицензированным пилотом и мотоциклистом. Ведущим телешоу, носившим бороду в духе Криса Кристофферсона, как и другие харизматичные парни 80-х. Он сражался с Биллом Гейтсом — и, как многие, проиграл. Позже он погиб при загадочных обстоятельствах в байкерском баре. Он ушел слишком рано, но жил полной жизнью.
 
 </aside>
 
-While the first transcompiler translated one assembly language to another,
-today, almost all transpilers work on higher-level languages. After the viral
-spread of UNIX to machines various and sundry, there began a long tradition of
-compilers that produced C as their output language. C compilers were available
-everywhere UNIX was and produced efficient code, so targetting C was a good way
-to get your language running on a lot of architectures.
+Хотя первый транспилятор переводил один ассемблер в другой, сегодня почти все транспилеры работают с высокоуровневыми языками. После распространения UNIX возникла традиция компиляторов, генерирующих код на C. Компиляторы C были доступны везде, где был UNIX, и создавали эффективный код, так что генерация C-кода стала способом портирования языков на разные архитектуры.
 
-Web browsers are the "machines" of today, and their "machine code" is
-JavaScript, so these days it seems [almost every language out there][js] has a
-compiler that targets JS since that's the <span name="js">only</span> way to get
-your code running in a browser.
-
-[js]: https://github.com/jashkenas/coffeescript/wiki/list-of-languages-that-compile-to-js
+Сегодня «машинами» являются веб-браузеры, а их «машинным кодом» — JavaScript. Поэтому сейчас почти каждый язык имеет компилятор в JS, поскольку это <span name="js">единственный</span> способ запустить код в браузере.
 
 <aside name="js">
+JS может перестать быть единственным нативно поддерживаемым браузерами языком. Если Web Assembly получит широкое распространение, браузеры смогут поддерживать еще один низкоуровневый язык, специально предназначенный для компиляции.
+Фронтенд транспилера (сканер и парсер) выглядит так же, как в обычном компиляторе. Если исходный язык представляет собой лишь поверхностную обертку над целевым, можно вообще обойтись без анализа и сразу выдавать аналогичный код. Если языки сильно различаются, придется добавить анализ и, возможно, оптимизацию. На этапе генерации кода, вместо машинных инструкций, просто создается строка синтаксически правильного кода на целевом языке.
 
-JS may not be the only language browsers natively support for much longer. If
-[Web Assembly][] takes off, browsers will support another lower-level language
-specifically designed to be targeted by compilers.
+После этого сгенерированный код компилируется стандартными инструментами целевого языка — и все готово.
 
-[web assembly]: https://github.com/webassembly/
+### JIT-компиляция
+Этот метод — не упрощение, а, скорее, сложный путь, доступный лишь экспертам. Самый быстрый способ выполнения кода — компиляция в машинные инструкции, но заранее неизвестно, на каком процессоре будет выполняться программа. Что делать?
 
-</aside>
+Можно поступить так, как HotSpot JVM, Microsoft CLR и большинство интерпретаторов JavaScript. При загрузке программы на компьютере пользователя (будь то исходный код, как в JS, или байт-код, как в JVM и CLR) код компилируется в машинные инструкции для нужной архитектуры. Это называется Just-in-time компиляцией, или просто JIT.
 
-The front end -- scanner and parser -- of a transpiler looks like other
-compilers. Then, if the source language is only a simple syntactic skin over the
-target language, it may skip analysis entirely and go straight to outputting the
-analogous syntax in the destination language.
-
-If the two languages are more semantically different, then you'll see more of
-the typical phases of a full compiler including analysis and possibly even
-optimization. Then, when it comes to code generation, instead of outputting some
-binary language like machine code, you produce a string of grammatically correct
-source (well, destination) code in the target language.
-
-Either way, you then run that resulting code through the output language's
-existing compilation pipeline and you're good to go.
-
-### Just-in-time compilation
-
-This last one is less of a shortcut and more a challenging scramble best
-reserved for experts. The fastest way to execute code is by compiling it to
-machine code, but you might not know what architecture your end user's machine
-supports. What to do?
-
-You can do the same thing the HotSpot JVM, Microsoft's CLR and most JavaScript
-interpreters do. On the end user's machine, when the program is loaded -- either
-from source in the case of JS, or platform-independent bytecode for the JVM and
-CLR -- you compile it to native for the architecture their computer supports.
-Naturally enough, this is called **just-in-time compilation.** Most hackers just
-say "JIT", pronounced like it rhymes with "fit".
-
-The most sophisticated JITs insert profiling hooks into the generated code to
-see which regions are most performance critical and what kind of data is flowing
-through them. Then, over time, they will automatically recompile those <span
-name="hot">hot spots</span> with more advanced optimizations.
+Самые продвинутые JIT-компиляторы вставляют в код инструменты профилирования, чтобы определять критически важные участки и анализировать проходящие через них данные. Затем они автоматически перекомпилируют <span name="hot">«горячие» участки</span> с лучшей оптимизацией.
 
 <aside name="hot">
-
-This is, of course, exactly where the HotSpot JVM gets its name.
-
+Именно так HotSpot JVM получил свое название.
 </aside>
 
-## Compilers and Interpreters
+### Компиляторы и интерпретаторы
+Теперь, когда я загрузил в твою голову целый словарь терминов языков программирования, наконец можно разобраться с вопросом, который мучает программистов с незапамятных времен: «В чем разница между компилятором и интерпретатором?»
 
-Now that I've stuffed your head with a dictionary's worth of programming
-language jargon, we can finally address a question that's plagued coders since
-time immemorial: "What's the difference between a compiler and an interpreter?"
-
-It turns out this is like asking the difference between a fruit and a vegetable.
-That seems like a binary either-or choice, but actually "fruit" is a *botanical*
-term and "vegetable" is *culinary*. One does not imply the negation of the
-other. There are fruits that aren't vegetables (apples) and vegetables that are
-not fruits (carrots), but also edible plants that are both fruits *and*
-vegetables, like tomatoes.
+Оказывается, этот вопрос похож на разницу между фруктом и овощем. Кажется, что это бинарный выбор «либо-либо», но на самом деле «фрукт» — это ботанический термин, а «овощ» — кулинарный. Одно не исключает другое. Есть фрукты, которые не являются овощами (например, яблоки), и овощи, которые не являются фруктами (например, морковь), но есть и съедобные растения, которые являются и фруктами, и овощами — например, помидоры.
 
 <span name="veg"></span></span>
 
-<img src="image/a-map-of-the-territory/plants.png" alt="A Venn diagram of edible plants" />
-
-<aside name="veg">
-
-There are even plant-based foods that are *neither*, like nuts and cereals. (And
-peanuts aren't even nuts!)
+<img src="image/a-map-of-the-territory/plants.png" alt="Диаграмма Венна съедобных растений" /> <aside name="veg">
+Есть даже растительные продукты, которые не относятся ни к одному из этих типов, например орехи и злаки. (Арахис вообще не является орехом!)
 
 </aside>
+Теперь вернемся к языкам программирования:
 
-So, back to languages:
+Компиляция — это технический процесс, который включает в себя перевод исходного кода на другой (обычно более низкоуровневый) язык. Когда ты генерируешь байткод или машинный код, ты выполняешь компиляцию. Когда ты транспилируешь код в другой высокоуровневый язык — это тоже компиляция. Если инструмент получает исходный код, преобразует его в целевой язык и завершает работу, мы называем его компилятором.
 
-* **Compilation** is an *implementation technique* that involves translating a
-  source language to some other -- usually lower-level -- form. When you
-  generate bytecode or machine code, you are compiling. When you transpile to
-  another high-level language you are compiling too. If users run a tool that
-  takes a source language and outputs some target language and then stops, we
-  call that tool a **compiler**.
+Интерпретация описывает опыт пользователя при выполнении кода. Если пользователь запускает один инструмент, который принимает исходный код и сразу же выполняет его, то этот инструмент — интерпретатор.
 
-* **Interpretation** describes the *user experience of executing a language*. If
-  the end user has a single tool that takes in source code and is able to then
-  execute it immediately, that tool is an **interpreter**.
+Как яблоки и апельсины, некоторые реализации являются чистыми компиляторами и не интерпретаторами. GCC и Clang берут код на C и компилируют его в машинный код. Конечный пользователь запускает скомпилированный исполняемый файл и даже может не знать, какой инструмент был использован для его создания. Это компиляторы для C.
 
-Like apples and oranges, some implementations are clearly compilers and *not*
-interpreters. GCC and Clang take your C code and compile it to machine code. An
-end user runs that executable directly and may never even know which tool was
-used to compile it. So those are *compilers* for C.
+В старых версиях эталонной реализации Ruby от Мацумото код запускался напрямую из исходника. Интерпретатор парсил код и выполнял его, обходя синтаксическое дерево, без каких-либо других преобразований — ни внутренних, ни видимых пользователю. Это был чистый интерпретатор для Ruby.
 
-In older versions of Matz' canonical implementation of Ruby, the user ran Ruby
-from source. The implementation parsed it and ran it directly by traversing the
-syntax tree. No other translation occurred, either internally or in any
-user-visible form. So this was definitely an *interpreter* for Ruby.
+А что насчет CPython? Когда ты запускаешь программу на Python с его помощью, код сначала парсится и преобразуется во внутренний формат байткода, который затем исполняется внутри виртуальной машины. С точки зрения пользователя это явно интерпретатор — программа выполняется напрямую из исходного кода. Но если заглянуть под «чешую» CPython, то можно увидеть, что там определенно происходит компиляция.
 
-But what of CPython? When you run your Python program using it, the code is
-parsed and converted to an internal bytecode format, which is then executed
-inside the VM. From the user's perspective, this is clearly an interpreter --
-they run their program from source. But if you look under CPython's scaly skin,
-you'll see that there is definitely some compiling going on.
-
-The answer is that it is <span name="go">both</span>. CPython *is* an
-interpreter, and it *has* a compiler. In practice, most scripting languages work
-this way, as you can see:
+Ответ: <span name="go">и то, и другое</span>. CPython является интерпретатором, но при этом имеет компилятор. На практике большинство скриптовых языков работают именно так:
 
 <aside name="go">
+[Go tool][go] — еще более интересный случай. Если ты запустишь go build, он скомпилирует исходный код Go в машинный код и остановится. Но если ты введешь go run, он сначала скомпилирует код, а затем сразу выполнит скомпилированный файл.
 
-The [Go tool][go] is even more of a horticultural curiosity. If you run `go
-build`, it compiles your Go source code to machine code and stops. If you type
-`go run`, it does that then immediately executes the generated executable.
+То есть go имеет компилятор, является интерпретатором и одновременно является компилятором.
 
-So `go` *has* a compiler, *is* an interpreter, and *is* also a compiler.
+</aside> <img src="image/a-map-of-the-territory/venn.png" alt="Диаграмма Венна компиляторов и интерпретаторов" />
+Та область пересечения в центре — это место для второго интерпретатора, поскольку он внутренне компилирует код в байткод. Так что хотя эта книга номинально посвящена интерпретаторам, мы затронем и компиляцию.
 
-[go tool]: https://golang.org/cmd/go/
+Наш путь
+Это довольно большой объем информации сразу. Но не переживай — это не та глава, где тебе нужно понять все эти детали. Я просто хочу, чтобы ты знал, что они существуют и представлял, как они соотносятся.
 
-</aside>
+Эта карта пригодится тебе, когда ты начнешь исследовать программирование за пределами маршрута, по которому мы идем в этой книге. Я хочу, чтобы у тебя возникло желание самому отправиться в путь и изучить все возможные вершины.
 
-<img src="image/a-map-of-the-territory/venn.png" alt="A Venn diagram of compilers and interpreters" />
-
-That overlapping region in the center is where our second interpreter lives too,
-since it internally compiles to bytecode. So while this book is nominally about
-interpreters, we'll cover some compilation too.
-
-## Our Journey
-
-That's a lot to take in all at once. Don't worry. This isn't the chapter where
-you're expected to *understand* all of these pieces and parts. I just want you
-to know that they are out there and roughly how they fit together.
-
-This map should serve you well as you explore the territory beyond the guided
-path we take in this book. I want to leave you yearning to strike out on your
-own and wander all over that mountain.
-
-But, for now, it's time for our own journey to begin. Tighten your bootlaces,
-cinch up your pack, and come along. From <span name="here">here</span> on out,
-all you need to focus on is the path in front of you.
+Но пока что пора начинать наш собственный путь. Затягивай шнурки, закидывай рюкзак на плечи и отправляемся. От <span name="here">этого момента</span> тебе нужно думать только о следующем шаге.
 
 <aside name="here">
+Обещаю дальше не злоупотреблять горными метафорами.
 
-Henceforth, I promise to tone down the whole mountain metaphor thing.
+</aside> <div class="challenges">
+Вопросы для размышления
+1. Выбери открытую реализацию языка программирования, который тебе нравится. Скачай его исходный код и поищи в нем реализацию сканера и парсера. Написаны ли они вручную или сгенерированы с помощью инструментов вроде Lex и Yacc? (Файлы с расширениями .l или .y обычно указывают на второе.)
 
-</aside>
+2. Компиляция «на лету» (JIT) считается самым быстрым способом реализации динамических языков, но используется не во всех. Почему разработчики могут отказаться от JIT?
 
-<div class="challenges">
-
-## Challenges
-
-1. Pick an open source implementation of a language you like. Download the
-   source code and poke around in it. Try to find the code that implements the
-   scanner and parser. Are they hand-written, or generated using tools like
-   Lex and Yacc? (`.l` or `.y` files usually imply the latter.)
-
-1. Just-in-time compilation tends to be the fastest way to implement a
-   dynamically-typed language, but not all of them use it. What reasons are
-   there to *not* JIT?
-
-1. Most Lisp implementations that compile to C also contain an interpreter that
-   lets them execute Lisp code on the fly as well. Why?
+3. Большинство Lisp-реализаций, компилирующихся в C, также содержат интерпретатор, который позволяет выполнять код на лету. Почему?
 
 </div>
