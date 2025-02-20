@@ -1,11 +1,11 @@
-^title A Map of the Territory
+^title Карта теори... территории!
 ^part Welcome
 
-> You must have a map, no matter how rough. Otherwise you wander all over the
-> place. In The Lord of the Rings I never made anyone go farther than he could
-> on a given day.
->
-> <cite>J.R.R. Tolkien</cite>
+> Добро пожаловать
+> У вас должна быть карта, даже если она грубая. Иначе вы будете блуждать без цели.
+> В Властелине колец я никогда не заставлял персонажей проходить больше, чем они могли за день.
+
+> <cite>Дж. Р. Р. Толкин</cite>
 
 We don't want to wander all over the place, so before we set off, let's scan
 the territory charted by previous language implementers. It will help us
