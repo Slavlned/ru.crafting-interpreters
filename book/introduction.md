@@ -1,249 +1,262 @@
-^title Introduction
-^part Welcome
+^title Введение
+^part Добро пожаловать
 
-> Fairy tales are more than true: not because they tell us that dragons exist, but because they tell us that dragons can be beaten.”
+> Сказки – больше, чем правда, не потому, что в них рассказывается о существовании драконов, а потому, что они говорят нам: драконов можно победить.”
 >
-> <cite>Neil Gaiman</cite>
+> <cite>Нил Гейман</cite>
 
-I'm really excited we're going on this journey together. This is a book on
-implementing interpreters for programming languages. It's also a book on how to
-design a language worth implementing. It's the book I wished I had when I first
-started getting into languages, and it's the book I've been writing in my <span
-name="head">head</span> for nearly a decade.
+Я очень рад, что мы пройдем этот путь вместе. Эта книга о реализации
+интерпретаторов для языков программирования. Но так же она о том, как
+спроектировать язык, достойный реализации. Мне бы хотелось, чтобы эта книга
+была у меня в то  время, когда я только начал погружение в языки. Уже в течение
+почти десятка лет я пишу её в своей <span name="head">голове</span>.
 
 <aside name="head">
 
-To my friends and family, sorry I've been so absent-minded!
+Мои друзья и семья, простите за то, что я был так погружен в собственные мысли!
 
 </aside>
 
-In these pages, we will walk step by step through two complete interpreters for
-a full-featured language. I assume this is your first foray into languages, so
-I'll cover each concept and line of code you need to build a complete, usable,
-fast language implementation.
+На этих страницах мы последовательно рассмотрим два законченных интерпретатора
+для полноценного языка. Полагаю, это ваше первое погружение в эту тему, поэтому
+постараюсь покрыть каждую концепцию и строчку кода, которые нужны вам для
+построения полной, практичной и быстрой реализации языка программирования.
 
-In order to cram two full implementations inside one book without it turning
-into a doorstop, this text is lighter on theory than others. As we build each
-piece of the system, I will introduce the history and concepts behind it. I'll
-try to get you familiar with the lingo so that if you ever find yourself in a
-<span name="party">cocktail party</span> full of PL (programming language)
-researchers, you'll fit in.
+Чтобы уместить две реализации в одну книгу и не сделать её такой большой, что
+можно было бы подпирать дверь, она содержит меньше теории, чем другая подобная
+литература. По мере того, как мы будем выстраивать части системы, я буду
+рассказывать истории и концепции, которые за ними стоят. Я постараюсь
+познакомить вас с профессиональным жаргоном, так что если вы попадете на <span
+name="party">коктейльную вечеринку</span>, полную исследователей ЯП (языков
+программирования), то впишетесь в неё.
 
 <aside name="party">
 
-Strangely enough, a situation I have found myself in multiple times. You
-wouldn't believe how much some of them can drink.
+Довольно странно, но я оказывался в такой ситуации несколько раз. Вы не 
+поверите, сколько некоторые из них могут выпить.
 
 </aside>
 
-But we're mostly going to spend our brain juice getting the language up and
-running. This is not to say theory isn't important. Being able to reason
-precisely and <span name="formal">formally</span> about syntax and semantics is
-a vital skill when working on a language. But, personally, I learn best by
-doing. It's hard for me to wade through paragraphs full of abstract concepts and
-really absorb them. But if I've coded something, ran it, and debugged it, then I
-*get* it.
+Но мы в основном будем тратить наши усилия на то, чтобы язык запустился и
+заработал. Это не означает, что теория не важна. Умение рассуждать четко и
+<span name="formal">формально</span> о синтаксисе и семантике -- несомненно
+важное умение при работе с языком. Однако лично я изучаю что-либо гораздо лучше
+на практике. Мне сложно пройти через множество параграфов, полных  абстрактных
+понятий, и действительно понять их. Только когда я что-то  запрограммировал,
+запустил и отладил, я могу сказать, что действительно  *понимаю* это.
 
 <aside name="formal">
 
-Static type systems in particular require rigorous formal reasoning. Hacking on
-a type system has the same feel as proving a theorem in mathematics.
+Статическая типизация особенно требует строгого формального обсуждения.
+Разработка системы типов схожа с доказательством теоремы в математике.
 
-It turns out this is no coincidence. In the early half of last century, Haskell
-Curry and William Alvin Howard showed that they are two sides of the same coin:
-[the Curry-Howard isomorphism][].
+Как оказалось, это действительно так. В первой половине прошлого века Хаскелл
+Карри и  Уильям Алвин Говард разработали доказательство того, что это стороны
+одной монеты: [изоморфизм Карри-Говарда][the curry-howard isomorphism].
 
-[the curry-howard isomorphism]: https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence
+[the curry-howard isomorphism]: https://ru.wikipedia.org/wiki/%D0%A1%D0%BE%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D1%81%D1%82%D0%B2%D0%B8%D0%B5_%D0%9A%D0%B0%D1%80%D1%80%D0%B8_%E2%80%94_%D0%A5%D0%BE%D0%B2%D0%B0%D1%80%D0%B4%D0%B0
 
 </aside>
 
-That's my goal for you. I want you to come away with a solid intuition of how a
-real language lives and breathes. My hope is that when you read other, more
-theoretical books later, the concepts there will firmly stick in your mind,
-adhered to this tangible substrate.
+Это то, что я хочу донести до вас. Мне хочется, чтобы вы получили твердую
+интуицию в том, как в действительности язык живет и дышит. Надеюсь, что позже вы
+прочтете и другие, более теоретические книги, когда все концепции будут крепко
+держаться в  вашем сознании, закрепленные на полученной здесь основе.
 
-## Why Learn This Stuff?
+## Для чего это вообще нужно изучать?
 
-Every introduction to every language book seems to have this section. I don't
-know what it is about programming languages that causes such existential doubt.
-I don't think ornithology books worry about justifying their existence. They
-assume the reader loves birds and get moving.
+Каждое введение в каждой подобной книге имеет такой раздел. Я не знаю, что не
+так с языками программирования, что они вызывают такие экзистенциальные
+сомнения. Не думаю, что книги по орнитологии волнуются об оправдании своего
+существования. Они полагают, что читатель любит птиц и стремится к развитию.
 
-But programming languages are a little different. I suppose it is true that the
-odds of any of us creating a broadly successful general-purpose programming
-language are slim. The designers of the world's widely-used languages could fit
-in a Volkswagen bus, even without putting the pop top camper up. If joining that
-elite group was the *only* reason to learn languages, it would be hard to
-justify. Fortunately, it isn't.
+Но с языками программирования несколько иная ситуация. Полагаю, шансы любого из
+нас на создание успешного языка программирования общего назначения невелики.
+Разработчики языков, широко применяемых во всем мире, могут вместиться в автобус
+Фольксваген, даже не поднимая крышу-палатку. Если бы присоединение к этой
+элитной группе было *единственной* причиной изучать языки, это занятие
+действительно было бы сложно оправдать. К счастью, это не так.
 
-### Little languages are everywhere
+### Маленькие языки повсюду
 
-For every successful general-purpose language out there, there are a thousand
-successful niche ones. We used to call them "little languages", but inflation in
-the jargon economy led today to the name "domain-specific languages". These are
-pidgins tailor-built to a specific task. Things like application scripting
-languages, template engines, markup formats, and configuration files.
+На каждый успешный язык общего назначения приходятся тысячи успешных нишевых
+языков. Раньше мы называли их "маленькие языки", но развитие жаргона приводит
+нас к названию "предметно-ориентированные языки" (domain-specific languages).
+Это пиджины (промежуточные языки) специально разработанные для конкретных задач.
+Например, это могут быть сценарии для приложений, движки шаблонов, форматы
+разметки и конфигурационные файлы.
 
 <span name="little"></span>
 <img src="image/introduction/little-languages.png" alt="A random selection of little languages." />
 
 <aside name="little">
 
-A random selection of some little languages you might run into.
+Случайная выборка некоторых маленьких языков, с которыми вы можете столкнуться.
 
 </aside>
 
-Almost every large software project needs a handful of these. When you can, it's
-good to reuse an existing one instead of rolling your own. Once you factor in
-documentation, debuggers, editor support, syntax highlighting, and all of the
-other trappings, doing it yourself becomes a tall order.
+Практически каждый крупный проект разработки ПО нуждается в нескольких из них.
+Если возможно, лучше использовать один из существующих, чем создавать свой. Как
+только вы задумываетесь о документации, отладчике, поддержке редактором,
+подсветке синтаксиса и прочей атрибутике, создание всего этого самостоятельно
+превращается в непростую задачу.
 
-But there's still a good chance you'll find yourself needing to whip up a parser
-or something when there isn't an existing library that fits your needs. Even
-when there *is* one to reuse, you'll inevitably end up needing to debug and
-maintain it and poke around in its guts.
+Но все еще остается довольно большой шанс того, что вам понадобится состряпать
+парсер чего-то, в то время как под рукой не окажется библиотеки, удовлетворяющей
+вашим нуждам. А если и *окажется*, вам неизбежно понадобится её отлаживать и
+поддерживать, а также ковыряться в её внутренностях.
 
-### Languages are great exercise
+### Языки -- это проекрасное упражнение
 
-Long distance runners sometimes train with weights strapped to their ankles or
-at high altitudes where the atmosphere is thin. When they later unburden
-themselves, the new relative ease of light limbs and oxygen-rich air enables
-them to run farther and faster.
+Бегуны на длинные дистанции иногда тренируются с весами на ногах, или на высотах
+с очень разреженным воздухом. Когда позже они избавляются от этого, легкость в
+конечностях и богатый кислородом воздух позволяют им бежать дальше и быстрее.
 
-Implementing a language is a real test of programming skill. The code is complex
-and performance critical. You must master recursion, dynamic arrays, trees,
-graphs, and hash tables. You probably use hash tables at least in your
-day-to-day programming, but how well do you *really* understand them? Well,
-after we've crafted our own from scratch, I guarantee you will.
+Разработка языка -- это настоящий тест ваших навыков программирования. Код здесь
+получается сложным, а производительность критична. Нужно владеть рекурсией,
+динамическими массивами, деревьями, графами и хэш-таблицами. Вы, вероятно,
+будете использовать хэш-таблицы в программировании каждый день, но будете ли вы
+*действительно* понимать их? Что ж, после того, как мы создадим их с нуля,
+гарантирую, что будете.
 
-While I intend to show you that a programming language isn't as daunting as you
-might believe, it is still a challenge. Rise to it, and you'll come away a
-stronger programmer, and smarter about how you use data structures and
-algorithms in your day job.
+Хоть я и хочу показать, что написание языка программирования не такое уж и
+страшное, это все еще испытание. Преодолев его, вы станете более сильным
+программистом и будете лучше понимать, как использовать структуры данных и
+алгоритмы в своей повседневной работе.
 
-### One more reason
+### Еще одна причина
 
-This last reason is hard for me to admit, because it's so close to my heart.
-Ever since I learned to program as a kid, I felt there was something magical
-about languages. When I first tapped out BASIC programs one key at a time I
-couldn't conceive how BASIC *itself* was made.
+Последнюю причину мне тяжело признать, потому что я принимаю её близко к сердцу.
+Во время обучения программированию в детстве, я чувствовал что-то волшебное в
+языках. Впервые набирая свои программы на BASIC клавишу за клавишей, я не
+представлял, как *сам* BASIC был устроен.
 
-Later, the mixture of awe and terror my college friends used to refer to their
-compilers class was enough to convince me language hackers were a different
-breed of human. Some sort of wizards granted privileged access to arcane arts.
+Позже, смешение трепета и страха, которое испытывали мои друзья по колледжу по
+отношению к курсу компиляторов, убедило меня, что разработчики языков -- это
+другой вид людей. Какие-то волшебники, имеющие доступ к мистическим искусствам.
 
-It's a charming <span name="image">image</span>, but it has a darker side. *I*
-didn't feel like a wizard, so I was left thinking I lacked some in-born quality
-necessary to join the cabal. Though I've been fascinated by languages ever since
-I doodled made up keywords in my school notebook, it took me decades to muster
-the courage to try to really learn them. That "magical" quality, that sense of
-exclusivity, excluded *me*.
+Этот <span name="image">образ</span> очарователен, но у него есть и темная
+сторона. *Я* не чувствовал себя волшебником и думал о том, что упустил какое-то
+врожденное качество, которое мешало мне присоединиться к их заговору. Так что я
+был очарован языками с тех пор как набросал несколько ключевых слов в школьной
+тетради, и у меня заняло десятки лет, чтобы набраться смелости и попробовать
+действительно изучить их. Это "магическое" качество, чувство особенности,
+отталкивало *меня*.
 
 <aside name="image">
 
-And one its practitioners don't hesitate to play up. Two of the seminal texts on
-programming languages feature a [dragon][] and a [wizard][] on their cover.
+Его приверженцы и не планируют с ним бороться. Два фундаментальных текста о
+языках программирования содержат [дракона][dragon] и [волшебника][wizard] на
+обложках.
 
 [dragon]: https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools
 [wizard]: https://mitpress.mit.edu/sicp/full-text/book/book.html
 
 </aside>
 
-When I did finally start cobbling together my own little interpreters, I quickly
-learned that, of course, there is no magic at all. It's just code, and the
-people who hack on languages are just people.
+Когда я в конце концов начал сколачивать свои собственные маленькие
+интерпретаторы, я быстро понял, что, разумеется, там вообще нет никакой магии.
+Это просто код, и люди, которые пишут языки -- просто люди.
 
-There *are* a few techniques you don't often encounter outside of languages, and
-some parts are a little difficult. But not more difficult than other obstacles
-you've overcome. My hope is that if you've felt intimidated by languages, and
-this book helps you overcome that fear, maybe I'll leave you just a tiny bit
-braver than you were before.
+*Есть* некоторые техники, с которыми вы не очень часто сталкиваетесь вне мира
+написания языков, и некоторые из них довольно сложные. Но не сложнее, чем другие
+препятствия, которые вы обычно преодолеваете. Надеюсь, что эта книга позволит
+вам перебороть этот страх, и, возможно, вы уйдете отсюда более храбрыми, чем
+были до этого.
 
-And, who knows, maybe you *will* make the next great language. Someone has to.
+И, кто знает, может быть вы *создадите* следующий великий язык. Кто-то ведь
+должен это сделать.
 
-## How the Book is Organized
+## Как эта книга устроена
 
-This book is broken into three parts. You're reading the first one now. It's a
-couple of chapters to get you oriented, teach you some of the lingo language
-hackers use, and introduce you to Lox, the language we'll be implementing.
+Эта книга разделена на три части. Сейчас вы читаете первую из них. Её
+предназначение -- сориентировать вас, научить некоторому жаргону, который
+используют разработчики языков, и представить вам Lox, язык, который мы будем
+реализовывать.
 
-Each of the other two parts builds one complete Lox interpreter. Within those
-parts, each chapter is structured the same. Every one takes a single language
-feature, teaches you the concepts behind it, and walks through an implementation
-of it.
+Каждая из двух оставшихся частей создает свой полный интерпретатор Lox. В этих
+частях все главы устроены одинаково. Каждая часть берет определенную фичу языка,
+обучает концептам, которые за ней лежат, и представляет её реализацию.
 
-It took a good bit of trial and error on my part, but I managed to carve up the
-two interpreters into chapter-sized chunks so that each builds on the previous
-ones. From the very first chapter, you'll have a program you can run and play
-with. With each passing chapter, it grows increasingly full-featured until you
-eventually have a complete language.
+Методом проб и ошибок у меня удалось разделить оба интерпретатора на куски по
+главам так, чтобы каждый следующий кусок основывался на предыдущем. Начиная с
+самой первой главы, у вас будет программа, которую можно запустить и
+попробовать. С каждой следующей главой она будет становиться все более
+полнофункциональной, пока вы не получите в конце концов полноценный язык.
 
-Aside from copious, scintillating English prose, chapters have a few other
-delightful facets:
+Помимо богатой и полной остроумия прозы, главы имеют следующие восхитительные
+вставки:
 
-### The code
+### Код
 
-We're about *crafting* interpreters, so this book contains real code. Every
-single line of code needed is included, and each snippet tells you where to
-insert it in your ever-growing implementation.
+Мы говорим о *ремесле создания* интерпретаторов, так что в этой книге есть
+настоящий код. Будет приведена каждая необходимая строка, а врезки расскажут
+вам, куда добавить её в вашу постоянно растущую реализацию.
 
-Many other language books and language implementations use tools like [Lex][]
-and <span name="yacc">[Yacc][]</span>, "compiler-compilers" to automatically
-generate some of the source files for an implementation from some higher level
-description. There are pros and cons to tools like those, and strong
-opinions -- some might say religious convictions -- on both sides.
+Многие другие книги о языках и их реализации используют такие инструменты как
+[Lex][] и <span name="yacc">[Yacc][]</span>, "компиляторы компиляторов"
+("compiler-compilers"), чтобы автоматически генерировать исходные файлы
+реализации из некоторого высокоуровневого описания. Есть плюсы и минусы
+использования таких инструментов и серьезные аргументы -- можно сказать,
+религиозные убеждения -- за и против.
 
 <aside name="yacc">
 
-Yacc is a tool that takes in a grammar file and produces a source file for a
-compiler, so it's sort of like a "compiler" that outputs a compiler, which is
-where we get the term "compiler-compiler".
+Yacc -- это инструмент, который принимает файл с грамматикой и создает исходные
+файлы для компилятора, то есть что-то вроде "компилятора", дающего на выходе
+компилятор. Мы будем называть это термином "компилятор компилятора"
+("compiler-compiler").
 
-Yacc wasn't the first of its ilk, which is why it's named "Yacc" -- *Yet
-Another* Compiler-Compiler. A later similar tool is [Bison][], named as a pun on
-the pronunciation of Yacc like "yak".
+Yacc не первый в своем роде, и именно поэтому он называется "Yacc" -- *Yet
+Another* Compiler-Compiler (еще один компилятор компилятора). Более молодой
+схожий инструмент [Bison][], назван от игры слов в произношении Yacc как "як".
 
 ![A yak.](image/introduction/yak.png)
 
 [bison]: https://en.wikipedia.org/wiki/GNU_bison
 
-If you find all of these little self-references and puns charming and fun,
-you'll fit right in here. If not, well, maybe the language nerd sense of humor
-is an acquired taste.
+Если вы находите все эти отсылки и каламбур очаровательными и забавными, вы
+почувствуете себя здесь как дома. Если нет, что ж, чувство юмора у ботаников
+наживное.
 
 </aside>
 
-We will abstain from using them here. I want to ensure there are no dark corners
-where magic and confusion can hide, so we'll write everything by hand. As you'll
-see, it's not as bad as it sounds and it means you really will understand each
-line of code and how both interpreters work.
+Мы будем воздерживаться его от использования здесь. Я стараюсь не оставить
+темных углов, где могут спрятаться магия и неоднозначность, так что мы будем
+писать все своими руками. Как увидите, это не так плохо, как звучит, и это
+значит, что вы действительно поймете каждую строчку кода и как оба
+интерпретатора работают.
 
 [lex]: https://en.wikipedia.org/wiki/Lex_(software)
 [yacc]: https://en.wikipedia.org/wiki/Yacc
 
-A book has different constraints from the "real world" and so the coding style
-here might not always reflect the best way to write maintainable production
-software. If I seem a little cavalier about, say, omitting `private` or
-declaring a global variable, understand I do so to keep the code easier on your
-eyes. The pages here aren't as wide as your IDE and every character counts.
+К коду в книге предъявляются требования, отличные от тех, что предъявляются к
+коду в "реальном мире", так что стиль программирования здесь не всегда может
+отражать лучшее решение для написания поддерживаемого в продакшнене программного
+обеспечения. Если я выгляжу неряшливым, пропуская `private` или объявляя
+глобальные переменные, прошу понять, что я стараюсь сохранять код проще в ваших
+глазах. Страницы здесь не такие широкие, как в вашей IDE, и каждый символ на
+счету.
 
-Also, the code doesn't have many comments. That's because each handful of lines
-is surrounded by several paragraphs of honest-to-God prose explaining it. When
-you write a book to accompany your program, you are welcome to omit comments
-too. Otherwise, you should probably use `//` a little more than I do.
+К тому же код содержит не так много комментариев. Это потому что каждый набор
+строк окружен несколькими параграфами, которые, видит Бог, объясняют их. Когда
+вы будете писать целую книгу для сопровождения вашей программы, тоже можете
+опускать комментарии. В противном случае, вы, выроятно, должны использовать
+`//` немного чаще, чем это делаю я.
 
-What this book *doesn't* contain is the machinery needed to compile and run the
-code. I assume you can slap together a makefile or a project in your IDE of
-choice in order to get the code to run.
+Чего эта книга *не содержит*, так это описания механизмов компиляции и запуска
+кода. Я полагаю, вы сможете сбацать makefile или проект в вашей IDE на выбор,
+чтобы запустить код.
 
-### Snippets
 
-Since the book contains literally every line of code needed for the
-implementations, the snippets are quite precise. Also, because I try to keep the
-program in a runnable state even when it's half-implemented, sometimes we add
-temporary code that is replaced in later snippets.
+### Врезки
 
-A snippet with all the bells and whistles looks like this:
+Так как книга содержит буквально каждую строчку, необходимую для реализации,
+все врезки предельно точны. Кроме того, так как я старался сохранять даже
+наполовину написанную программу в рабочем состоянии, иногда мы добавляем
+временный код, который будет заменен в последующих врезках.
+
+Врезка со всеми примочками выглядит так:
 
 <div class="codehilite"><pre class="insert-before"><span></span>      <span class="k">default</span><span class="o">:</span>
 </pre><div class="source-file"><em>lox/Scanner.java</em><br>
@@ -257,191 +270,196 @@ replace 1 line</div>
 </pre><pre class="insert-after"><span></span>        <span class="k">break</span><span class="o">;</span>
 </pre></div>
 
-In the center, you have the new code being added in this snippet. It may have a
-few faded out lines above or below to show you where to insert it in the
-existing code. There is also a little blurb telling you which file and where in
-the file it goes. If it says "replace _ lines", there was some previous code
-between the faded lines that you need to remove and replace with this snippet.
+В центре располагается новый код, добавляемый в этой врезке. Сверху и снизу
+могут находиться полупрозрачные строки, которые показывают, куда необходимо
+вставить врезку в существующем коде. Также есть небольшая подсказка, которая
+подсказывает имя и место в файле. Если она говорит "replace _ lines", значит до
+этого между полупрозрачными строками был предыдущий код, который вы должны
+заменить на эту врезку.
 
-### Asides
+### Заметки на полях
 
-<span name="joke">Asides</span> contain biographical sketches, historical
-background, references to related topics, and suggestions of other areas to
-explore. There's nothing that you *need* to know in them to understand later
-parts of the book, so you can skip them if you want. I won't judge you, but I
-might be a little sad.
+ <span name="joke">Заметки на полях</span> содержат биографические фрагменты,
+ историческую справку, ссылки на связанные темы и рекомендации других областей
+ исследования. В них нет ничего такого, что вам *нужно* знать, чтобы понимать
+ последующие части книги, так что можете пропускать их, если хотите. Я не буду
+ осуждать вас, но могу немного расстроиться.
 
 <aside name="joke">
 
-Well, some asides do, at least. Most of them are just dumb jokes and amateurish
-drawings.
+По крайней мере, некоторые. Большинство из них -- это просто глупые шутки и
+любительские рисунки.
 
 </aside>
 
-### Challenges
+### Задачи
 
-Each chapter ends with a few exercises. Unlike textbook problem sets which tend
-to rehash material you already covered, these are to help you learn *more* than
-what's in the chapter. They force you to step off the guided path and explore on
-your own. They will make you research other languages, figure out how to
-implement features or otherwise get you to strike out on your own.
+Каждая глава заканчивается несколькими упражнениями. В отличие от стандартных
+вопросов в учебниках, рассчитаных на повтор только что прочитанного материала,
+они нацелены на то, чтобы вы изучили *больше*, чем есть в главе. Они сподвигнут
+вас отойти от протоптанной тропы и исследовать самим. Для их решения может быть
+необходимо изучать другие языки, понимать, как реализовать фичи языка или любым
+другим образом действовать самостоятельно. 
 
-Vanquish them and you'll come away with a broader understanding and possibly a
-few bumps and scrapes. Or skip them if you want to stay inside the comfy
-confines of the tour bus. It's your book.
+Преодолев их, вы приобретете более широкое понимание вещей и, возможно, синяки и
+царапины. Но вы можете и пропустить их, если хотите оставаться в пределах
+комфортного туристического автобуса. Это ваша книга. 
 
-### Design notes
+### Рабочие заметки
 
-Most "programming language" books are strictly programming language
-*implementation* books. They rarely discuss how one might happen to *design* the
-language being implemented. Implementation is fun because it is so <span
-name="benchmark">precisely defined</span>. We programmers seem to have an
-affinity for things that are black and white, ones and zeroes.
+Большинство книг о языках программирования на самом деле являются книгами о
+*реализации* языков программирования. Но в них редко обсуждается, как
+*спроектировать* язык, который позже будет реализован. Реализация - это весело,
+потому что она <span name="benchmark">точно определена</span>. Мы, программисты,
+видимо, слишком родны с вещами, которые белые и черные, нули и единицы.
 
 <aside name="benchmark">
 
-I know a lot of language hackers whose careers are based on this. You slide a
-language spec under their door, wait a few months, and code and benchmark
-results come out.
+Я знаю много разработчиков языков, чья карьера основана на этом. Ты засовываешь
+спецификацию языка под их дверь, ждешь несколько месяцев, и получаешь код с
+тестами производительности на выходе.
 
 </aside>
 
-Personally, I think the world only needs so many implementations of <span
-name="fortran">FORTRAN 77</span>. At some point, you find yourself designing a
-*new* language. Once you start playing *that* game, then the softer, human side
-of the equation becomes paramount. Things like what features are easy to learn,
-how to balance innovation and familiarity, what syntax is more readable and to
-whom.
+Лично мне кажется, что в мире уже достаточно реализаций <span name="fortran">
+FORTRAN 77</span>. В определенный момент времени вы начинаете разрабатывать
+*новый* язык. Как только вы начинаете играть в *эту* игру, человеческая сторона
+уравнения становится более значимой. Например, легкость изучения, баланс
+инноваций и консерватизма, а также читабельность синтаксиса.
 
 <aside name="fortran">
 
-Hopefully a language that doesn't hardcode assumptions about the width of a
-punched card into its grammar.
+Надеюсь, язык, в грамматике которого не будет заложена ширина перфокарты.
 
 </aside>
 
-All of that stuff profoundly affects the success of your new language. I want
-your language to succeed, so in some chapters I end with a "design note", a
-little essay on some corner of the human aspect of programming languages. I'm no
-expert on this -- I don't know if anyone really is -- so take these with a large
-pinch of salt. That should make them tastier food for thought, which is my main
-aim.
+Все это серьезно влияет на успех вашего нового языка. Мне хочется, чтобы ваши
+языки были успешными, потому некоторые главы я заканчиваю "рабочими заметками",
+маленькими очерками о человеческом аспекте языков программирования. Я не
+эксперт в этом -- не уверен, что кто-то действительно эксперт -- так что
+воспринимайте это с большой долей скепсиса. Это кроме прочего сделает их более
+вкусными, а это моя основная цель. (По-английски "принимать с большой долей
+скепсиса" звучит так же, как и "принимать с большой щепоткой соли" - прим.
+переводчика).
 
-## The First Interpreter
+## Первый интерпретатор
 
-We'll write our first interpreter, jlox, in Java. The focus is on *concepts*.
-We'll write the simplest, cleanest code we can to correctly implement the
-semantics of the language. This will get us comfortable with the basic
-techniques and also hone our understanding of exactly how the language is
-supposed to behave.
+Мы напишем наш первый интерпретатор, под названием jlox, на Java, фокусируясь на
+*концепциях*. Чтобы реализовать семантику языка, мы напишем настолько простой и
+чистый код, который только сможем. Это познакомит нас ближе с основными
+техниками и принесет понимание, как именно язык должен себя вести.
 
-Java is a great language for this. It's high level enough that we don't get
-overwhelmed by fiddly implementation details, but it's still pretty explicit.
-Unlike scripting languages, there tends to be less magic under the hood, and
-you've got static types to see what data structures you're working with.
+Java прекрасно для этого подходит. Она достаточно высокоуровневая, чтобы мы не
+заостряли внимание на мелких деталях реализации, но, тем не менее, достаточно
+явная. В отличие от скриптовых языков, она старается держать меньше магии под
+капотом иимеет статические типы, позволяющие видеть, с какими структурами данных
+вы работаете.
 
-I also chose it specifically because it is an *object-oriented* language. That
-paradigm swept the programming world in the 90s and is now the dominant way of
-thinking for millions of programmers. Odds are good you're already used to
-organizing things into classes and methods, so we'll keep you in that comfort
-zone.
+Кроме того, я выбрал её именно потому, что она *объектно-ориентированная*. Эта
+парадигма захватила мир программирования в 90-ых и сейчас это наиболее
+распространенный способ мышления среди миллионов программистов. Большинство из
+вас так же думает о вещах посредством классов и методов, так что мы останемся в
+комфортной для вас зоне.
 
-While academic language folks sometimes look down on object-oriented languages,
-the reality is that they are widely used even for language work. GCC and LLVM
-are written in C++, as are most JavaScript virtual machines. Object-oriented
-languages are ubiquitous and the tools and compilers *for* a language are often
-written *in* the <span name="host">same language</span>.
+Хотя академические создатели языков иногда смотрят на объектно-ориентированную
+парадигму свысока, реальность заключается в том, что она широко используется
+даже в сфере разработки языков. GCC и LLVM написаны на C++, как и большинство
+виртуальных машин JavaScript. Объектно-ориентированные языки вездесущи, а
+инструменты и компиляторы *для* языка часто написаны *на* <span name="host">том
+же самом языке</span>.
 
 <aside name="host">
 
-A compiler reads in files in one language and translates them to files in
-another language. You can implement a compiler in any language, including the
-same language it compiles, a process called **"self-hosting".**
+Компилятор читает файлы на одном языке и транслирует их в файлы на другом языке.
+Вы можете реализовать компилятор на любом языке, включая тот язык, который он
+компилирует. Это называется **"самодостаточость"** (self-hosting).
 
-You can't compile it using itself yet, but if you have another compiler for your
-language written in some other language, you use *that* one to compile your
-compiler once. Now you can use the compiled version of your own compiler to
-compile future versions of itself and you can discard the original one compiled
-from the other compiler. This is called **"bootstrapping"** from the image of
-pulling yourself up by your own bootstraps.
+Вы не можете скомпилировать такой компилятор при помощи него самого, но, если у
+вас есть другой компилятор вашего языка, написанный на каком-то другом языке, вы
+можете использовать *его*, чтобы скомпилировать ваш компилятор. Теперь вы можете
+использовать скомпилированную версию своего компилятора, чтобы компилировать его
+будущие версии, и вы можете выкинуть предыдущую, скомпилированную другим
+компилятором. Это называется **бутстраппинг** (bootstrapping). Такое название
+произошло от ситуации, когда вы тянете себя за петельки на своих ботинках.
 
-![Fact: This is the primary mode of transportation of the American cowboy.](image/introduction/bootstrap.png)
+![Факт: Это основной способ перемещения Американских ковбоев.](image/introduction/bootstrap.png)
 
 </aside>
 
-And, finally, Java is hugely popular. That means there's a good chance you
-already know it, so there's less for you to learn to get going in the book. If
-you aren't that familiar with Java, don't freak out. I try to stick to a fairly
-minimal subset of it. I use the diamond operator from Java 7 to makes things a
-little more terse, but that's about it as far as "advanced" features go. If you
-know another object-oriented language like C# or C++, you can probably muddle
-through fine.
+И, наконец, Java очень популярна. А значит есть большая вероятность, что вы уже
+её знаете, так что для чтения этой книги вам нужно будет меньше учить. Если вы
+не знакомы с Java, не переживайте. Я попробую использовать как можно меньшее её
+подмножество. Я использую оператор "diamond" из Java 7, чтобы сделать код более
+лаконичным, но это все, что касается "продвинутых" возможностей языка. Если вы
+знаете другой объектно-ориентированный язык, например, C# или C++, вы должны
+разобраться.
 
-By the end of part II, we'll have a simple, readable implementation. What we
-won't have is a *fast* one. It also leans on the Java virtual machine's runtime
-facilities, but we want to learn how Java *itself* implements those things.
+К концу части II, мы получим простую и читаемую реализацию. Чего у нас не будет,
+так это *быстрой* реализации. Это в том числе из-за особенностей виртуальной
+машины Java, но мы хотим изучить, как Java *сама* реализует эти вещи.
 
-## The Second Interpreter
+## Второй интерпретатор
 
-So in the next part, we'll start all over again, but this time in C. C is the
-perfect language for understanding how an implementation *really* works, all the
-way down to the bytes in memory and the code flowing through the CPU.
+Итак, в следующей части мы начнем все с начала, но на этот раз на C. C -- это
+прекрасный язык для понимания как *действительно* работают реализации, на всем
+пути вниз до байтов в памяти и кода, протекающего через CPU.
 
-A big reason that we're using C is so I can show you things C is particularly
-good at, but that *does* mean you'll need to be pretty handy with it. You don't
-have to be the reincarnation of Dennis Ritchie, but you shouldn't be spooked by
-pointers either.
+Одна из основных причин использования C -- это то, что я покажу вам вещи, в
+которых C действительно хорош, но это *значит*, что вам необходимо довольно
+ловко обращаться с ним. Вам не нужно быть реинкарнацией Денниса Ритчи, но и
+указатели не должны вас пугать.
 
-If you aren't there yet, pick up an introductory book on C and chew through it,
-then come back here when you're done. In return, you'll come away from this book
-an even stronger C programmer. That's useful given how many language
-implementations are written in C: Lua, CPython, and Ruby's MRI, to name a few.
+Если вы еще не настолько хорошо знаете С, приобретите вводную книгу и прочитайте
+её, после чего возвращайтесь. Взамен, к концу этой книги вы будете еще и более
+сильным программистом на C. Это пойдет вам на пользу, учитывая сколько
+реализаций написаны на C, как-то: Lua, CPython и Ruby MRI и т. д.
 
-In our C interpreter, <span name="clox">clox</span>, we are forced to implement
-for ourselves all the things Java gave us for free. We'll write our own dynamic
-array and hash table. We'll decide how objects are represented in memory, and
-build a garbage collector to reclaim it.
+В нашем интерпретаторе на C, под названием <span name="clox">clox</span>, мы
+вынуждены реализовать для себя все те вещи, которые Java давала нам бесплатно.
+Мы напишем наши собственные динамические массивы и хэш таблицы. Мы решим, как
+объекты будут расположены в памяти и построим собственный сборщик мусора.
 
 <aside name="clox">
 
-I pronounce the name like "sea-locks", but you can say it "clocks" or even
-"clochs", where you pronounce the "x" like the Greeks do if it makes you happy.
+Я произношу название как "си-локс", но вы можете говорить "клокс", или даже 
+"клохс", произнося "x" по-гречески, если вам угодно.
 
 </aside>
 
-Our Java implementation was focused on being correct. Now that we have that
-down, we'll turn to also being *fast*. Our C interpreter will contain a <span
-name="compiler">compiler</span> that translates the code to an efficient
-bytecode representation (don't worry, I'll get into what that means soon) which
-it then executes. This is the same technique used by implementations of Lua,
-Python, Ruby, PHP and many other successful languages.
+Наша реализация на Java фокусировалась на корректности. Теперь, когда мы
+опустились так низко, мы сосредоточимся на *скорости*. Наш интерпретатор на C
+будет содержать <span name="compiler">компилятор</span>, который транслирует код
+в эффективное байт-код представление (не волнуйтесь, я скоро объясню, что это
+значит), который он затем будет исполнять. Эта же техника используется в
+реализациях Lua, Python, Ruby, PHP и многих других успешных языков.
 
 <aside name="compiler">
 
-Did you think this was just an interpreters book? It's a compiler book as well.
-Two for the price of one!
+Вы думали это книга только об интерпретаторах? А она еще и о компиляторах. Два
+по цене одного!
 
 </aside>
 
-We'll even try our hand at benchmarking and optimization. By the end we'll have
-a robust, accurate, fast interpreter for our language, able to keep up with
-other professional caliber implementations out there. Not bad for one book and a
-few thousand lines of code.
+Мы также попробуем своими руками провести тесты производительности и
+оптимизации. К концу мы получим крепкий, точный, быстрый интерпретатор для
+нашего языка, способный конкурировать с другими профессиональными
+реализациями. Неплохо для одной книги и нескольких тысяч строк кода.
 
 <div class="challenges">
 
-## Challenges
+## Задачи
 
-1. There are least six domain-specific languages used in the [little system I
-   cobbled together][repo] to write and publish this book. What are they?
+1. Есть по крайней мере шесть предметно-ориентированных языков, используемых в 
+   [маленькой системе, которую я сколотил][repo], чтобы написать и опубликовать
+   эту книгу. Какие?
 
-1. Get a "Hello, world!" program written and running in Java. Set up whatever
-   Makefiles or IDE projects you need to get it working. If you have a debugger,
-   get comfortable with it and step through your program as it runs.
+1. Возьмите программу "Hello, world!", написанную на Java. Настройте Makefile
+   или проект в IDE, чтобы она заработала. Если у вас есть отладчик, освойтесь с
+   ним и пошагайте в нем по вашей программе.
 
-1. Do the same thing for C. To get some practice with pointers, define a
-   [doubly-linked list][] of heap-allocated strings. Write functions to insert,
-   find, and delete items from it. Test them.
+1. Сделайте тоже самое для C. Чтобы попрактивоваться с указателями, определите
+   [двусвязный список][] динамически выделяемых строк. Напишите для него функции
+   вставки, поиска и удаления элементов. Протестируйте их.
 
 [repo]: https://github.com/munificent/craftinginterpreters
 [doubly-linked list]: https://en.wikipedia.org/wiki/Doubly_linked_list
@@ -450,35 +468,38 @@ few thousand lines of code.
 
 <div class="design-note">
 
-## Design Note: What's in a Name?
+## Рабочая заметка: что такого с именем?
 
-One of the hardest challenges in writing this book was coming up with a name for
-the language it implements. I went through *pages* of candidates before I found
-one that worked. As you'll discover on the first day you start building your own
-language, naming is deviously hard. A good name satisfies a few criteria:
+Одним из сложнейших испытаний в процессе написания этой книги было разобраться с
+именем языка, который здесь реализуется. Я перепробовал целые *страницы*
+кандидатов, прежде чем нашел тот, который подходит. Как вы увидите в первый день
+разработки собственного языка, именование на удивление тяжело. Хорошее имя
+должно удовлетворять следующим критериям:
 
-1. **It isn't in use.** You can run into all sorts of trouble, legal and social,
-   if you inadvertently step on someone else's name.
+1. **Оно еще никем не используется.** У вас могут быть проблемы, юридические или
+   социальные, если вы ненароком наткнетесь на чье-то чужое имя.
 
-2. **It's easy to pronounce.** If things go well, hordes of people will be
-   saying and writing your language's name. Anything longer than a couple of
-   syllables or a handful of letters will annoy them to no end.
+2. **Оно имеет простое произношение.** Если дело пойдет хорошо, полчища людей
+   будут произносить и писать имя вашего языка. Что-то большее, чем несколько
+   слогов или букв, будет постоянно их бесить.
 
-3. **It's distinct enough to search for.** People will Google your language's
-   name to find docs for it, so you want a word that's rare enough that most
-   results point to your docs. Though, with the amount of AI most search engines
-   are packing today, that's less of an issue. Still, you won't be doing your
-   users any favors if you name your language "for".
+3. **Оно достаточно уникальное, для поиска.** Люди будут гуглить название вашего
+   языка, чтобы найти информацию о нем, так что вам нужно слово, достаточно
+   редкое для того, чтобы большинство результатов указывали на вашу
+   документацию. Хотя, с тем количеством искусственного интеллекта, которое
+   используется большинством поисковых движков сейчас, это не такая большая
+   проблема. Тем не менее, вы не получите от ваших пользователей хоть какой-то
+   благодарности, если назовете свой язык "for".
 
-4. **It doesn't have negative connotations across a number of cultures.** This
-   is hard to guard for, but it's worth considering. The designer of Nimrod
-   ended up renaming his language to "Nim" because too many people only remember
-   that Bugs Bunny used "Nimrod" as an insult.
+4. **Оно не содержит негативных отсылок к каким-либо культурам.** От этого
+   тяжело защититься, но лучше это учесть. Разработчик языка Nimrod в итоге
+   сократил название до "Nim", потому что слишком многие люди помнят, что Багз
+   Банни использовал слово "Nimrod" как оскорбление.
 
-If your potential name makes it through that gauntlet, keep it. Don't get hung
-up on trying to find an appellation that captures the quintessence of your
-language. If the names of the world's other successful languages teach us
-anything, it's that the name doesn't matter much. All you need is a reasonably
-unique token.
+Если потенциальное имя удовлетворяет этим пунктам, берите его. Не зацикливайтесь
+на поиске названия, которое охватывает всю суть вашего языка. Если названия
+самых популярных языков в мире чему-то нас и научили, так это тому, что
+название не значит почти ничего. Все, что вам нужно - это просто достаточно
+уникальное обозначение.
 
 </div>
